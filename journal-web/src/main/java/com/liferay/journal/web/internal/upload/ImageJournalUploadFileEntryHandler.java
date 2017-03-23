@@ -30,12 +30,12 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.ResourcePermissionCheckerUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.servlet.ServletResponseConstants;
-import com.liferay.portal.kernel.upload.BaseUploadHandler;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
+import com.liferay.upload.UploadFileEntryHandler;
 
 import java.io.InputStream;
 
@@ -45,9 +45,9 @@ import javax.portlet.PortletResponse;
 /**
  * @author Eduardo Garcia
  */
-public class ImageJournalUploadHandler extends BaseUploadHandler {
+public class ImageJournalUploadFileEntryHandler implements UploadFileEntryHandler {
 
-	public ImageJournalUploadHandler(
+	public ImageJournalUploadFileEntryHandler(
 		JournalFileUploadsConfiguration journalFileUploadsConfiguration) {
 
 		_journalFileUploadsConfiguration = journalFileUploadsConfiguration;
@@ -81,7 +81,7 @@ public class ImageJournalUploadHandler extends BaseUploadHandler {
 	}
 
 	@Override
-	protected FileEntry addFileEntry(
+	public FileEntry addFileEntry(
 			long userId, long groupId, long folderId, String fileName,
 			String contentType, InputStream inputStream, long size,
 			ServiceContext serviceContext)
@@ -93,7 +93,7 @@ public class ImageJournalUploadHandler extends BaseUploadHandler {
 	}
 
 	@Override
-	protected void checkPermission(
+	public void checkPermission(
 			long groupId, long folderId, PermissionChecker permissionChecker)
 		throws PortalException {
 
@@ -110,7 +110,7 @@ public class ImageJournalUploadHandler extends BaseUploadHandler {
 	}
 
 	@Override
-	protected void doHandleUploadException(
+	public void doHandleUploadException(
 			PortletRequest portletRequest, PortletResponse portletResponse,
 			PortalException pe, JSONObject jsonObject)
 		throws PortalException {
@@ -131,7 +131,7 @@ public class ImageJournalUploadHandler extends BaseUploadHandler {
 	}
 
 	@Override
-	protected FileEntry fetchFileEntry(
+	public FileEntry fetchFileEntry(
 		long userId, long groupId, long folderId, String fileName) {
 
 		try {
@@ -148,23 +148,17 @@ public class ImageJournalUploadHandler extends BaseUploadHandler {
 	}
 
 	@Override
-	protected JSONObject getImageJSONObject(PortletRequest portletRequest)
-		throws PortalException {
-
-		JSONObject imageJSONObject = super.getImageJSONObject(portletRequest);
-
-		imageJSONObject.put("type", "journal");
-
-		return imageJSONObject;
+	public void customizeFileJSONObject(JSONObject jsonObject) {
+		jsonObject.put("type", "journal");
 	}
 
 	@Override
-	protected String getParameterName() {
+	public String getParameterName() {
 		return "imageSelectorFileName";
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ImageJournalUploadHandler.class);
+		ImageJournalUploadFileEntryHandler.class);
 
 	private final JournalFileUploadsConfiguration
 		_journalFileUploadsConfiguration;
