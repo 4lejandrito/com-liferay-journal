@@ -16,20 +16,22 @@ package com.liferay.journal.web.internal.portlet.action;
 
 import com.liferay.journal.configuration.JournalFileUploadsConfiguration;
 import com.liferay.journal.constants.JournalPortletKeys;
-import com.liferay.journal.web.internal.upload.ImageJournalUploadHandler;
+import com.liferay.journal.web.internal.upload.ImageJournalUploadFileEntryHandler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.upload.UploadHandler;
 
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 
+import com.liferay.upload.UploadFileEntryHandler;
+import com.liferay.upload.UploadHandler;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eduardo Garcia
@@ -48,7 +50,7 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 	@Activate
 	@Modified
 	protected void activate(Map<String, Object> properties) {
-		_uploadHandler = new ImageJournalUploadHandler(
+		_uploadFileEntryHandler = new ImageJournalUploadFileEntryHandler(
 			ConfigurableUtil.createConfigurable(
 				JournalFileUploadsConfiguration.class, properties));
 	}
@@ -58,9 +60,13 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		_uploadHandler.upload(actionRequest, actionResponse);
+		_uploadHandler.upload(
+			_uploadFileEntryHandler, actionRequest, actionResponse);
 	}
 
-	private volatile UploadHandler _uploadHandler;
+	@Reference
+	private UploadHandler _uploadHandler;
+
+	private volatile UploadFileEntryHandler _uploadFileEntryHandler;
 
 }
